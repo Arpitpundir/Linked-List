@@ -92,8 +92,6 @@ int main(){
   node* head = NULL;
   buildLL(head, n);
   printLL(head);
-  //node* mid = findMid(head);
-  //cout<<mid->val<<endl;
   node* end = reverseLL(mid);
   cout<<end->val<<endl;
   if(isPalindrome(head, end)){
