@@ -25,74 +25,66 @@ public:
         end = NULL;
     }
 
-    void deleteNode(DLLNode *node){
-        //cout<<"end 1"<<end->val<<endl;
-
+    void deleteNodeFromEnd(){
+        if(end == NULL) return;
+        DLLNode *nextEnd = NULL;
         if(end->next){
-            end = end->next;
-            end->prev = NULL;
-        }else{
-            end = NULL;
+            nextEnd = end->next;
+            nextEnd->prev = NULL;
         }
-        //cout<<"end 2"<<end->val<<endl;
-        this->cacheMap.erase(node->key);
-        delete node;
-        this->usedNodes--;
+        this->cacheMap.erase(end->key);
+        if(head == end){
+            head = nextEnd;
+        }
+        delete(end);
+        end = nextEnd;
     }
 
-    void addNode(DLLNode *node, int key){
-        //cout<<"add "<<key<<endl;
-        if(!head) {
+    void addNodeInFront(DLLNode *node){
+        //cout
+        if(head == NULL){
             head = node;
             end = node;
         }else{
-            head->next = node;
-            node->prev = head;
-            head = node;
+          head->next = node;
+          node->prev = head;
+          node->next = NULL;
+          head = node;
         }
-        this->usedNodes++;
-        this->cacheMap[key] = node;
-                //cout<<"add "<<head->val<<endl;
-
-        return;
+        this->cacheMap[node->key] = node;
     }
 
     void moveToHead(DLLNode *node){
-        if(node->prev){
+        if(node == head) return;
+        if(node == end){
+            end = node->next;
+            node->next->prev = NULL;
+        }else{
             node->prev->next = node->next;
-        }
-        if(node->next){
             node->next->prev = node->prev;
-            if(node == end){
-                end = node->next;
-            }
         }
-        if(head != node){
-            node->prev = head;
-            head->next = node;
-            node->next = NULL;
-            head = node;
-        }
+        this->addNodeInFront(node);
     }
     
     int get(int key) {
-        // check in map
-        //cout<<this->cacheMap[key]->val<<" cacheMap"<<endl;
-       // cout<<"get "<<key<<endl;
-        if(this->cacheMap.count(key) == 0) return -1;
+        if(this->cacheMap.find(key) == this->cacheMap.end()) return -1;
         this->moveToHead(this->cacheMap[key]);
-       // this->printLL();
         return this->cacheMap[key]->val;
     }
     
     void put(int key, int value) {
+        if(this->cacheMap.find(key) != this->cacheMap.end()) {
+            this->cacheMap[key]->val = value;
+            this->moveToHead(this->cacheMap[key]);
+            return;
+        }
         if(this->usedNodes >= this->capacity){
-            this->deleteNode(end);
+            this->deleteNodeFromEnd();
+            this->usedNodes--;
         }
         DLLNode *newNode = new DLLNode(key, value);
-        this->addNode(newNode, key);
-        //this->printLL();
-        //cout<<"put "<<head->val<<endl;
+        this->addNodeInFront(newNode);
+        this->usedNodes++;
     }
     void printLL(){
         DLLNode *temp = end;
@@ -103,3 +95,10 @@ public:
         cout<<endl;
     }
 };
+
+/*
+Missed Edge case
+* when only one node is present
+* when node to be moved to head has both prev and next
+* default value of a pointer is not null
+*/
